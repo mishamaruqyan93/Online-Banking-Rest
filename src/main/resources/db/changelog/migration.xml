@@ -1,0 +1,185 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="1.0.0" author="misha.maruqyan">
+        <createTable tableName="customer">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="surname" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="ENUM('CUSTOMER','MANAGER')">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0.1" author="misha.maruqyan">
+        <createTable tableName="account">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="account_number" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gen_status_type" type="ENUM('ACTIVE','PASSIVE')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_type" type="ENUM('USD','EUR','RUB','AMD')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_balance" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0.2" author="misha.maruqyan">
+        <addForeignKeyConstraint baseColumnNames="customer_id"
+                                 baseTableName="account"
+                                 constraintName="customer_fk"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedTableName="customer"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1.0.3" author="misha.maruqyan">
+        <createTable tableName="loan">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="principal_loan_amount" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_amount" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="due_date" type="DATE 'mm/DD/yyyy hh:mm:ss'">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="DATE 'mm/DD/yyyy hh:mm:ss'">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0.4" author="misha.maruqyan">
+        <addForeignKeyConstraint baseColumnNames="customer_id"
+                                 baseTableName="loan"
+                                 constraintName="customer_fk_02"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedTableName="customer"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1.0.5" author="misha.maruqyan">
+        <createTable tableName="money_transfer">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="transfer_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="amount" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_from" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="account_to" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0.6" author="misha.maruqyan">
+        <addForeignKeyConstraint baseColumnNames="account_from"
+                                 baseTableName="money_transfer"
+                                 constraintName="customer_fk_o3"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedTableName="customer"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1.0.7" author="misha.maruqyan">
+        <addForeignKeyConstraint baseColumnNames="account_to"
+                                 baseTableName="money_transfer"
+                                 constraintName="customer_fk_o4"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedTableName="customer"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1.0.8" author="misha.maruqyan">
+        <createTable tableName="credit_card">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="expire_date" type="DATETIME"/>
+            <column name="status_type" type="ENUM('ACTIVE','PASSIVE')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cvv" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="card_number" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0.9" author="misha.maruqyan">
+        <addForeignKeyConstraint baseColumnNames="customer_id"
+                                 baseTableName="credit_card"
+                                 constraintName="customer_fk_o5"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedTableName="customer"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1.1.0" author="misha.maruqyan">
+        <createTable tableName="currency">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="currency" type="DOUBLE"/>
+            <column name="currency_type" type="ENUM('USD','EUR','RUB','AMD')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="local_date_time" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
