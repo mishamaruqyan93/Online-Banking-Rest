@@ -40,7 +40,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         validator.validateObjectNullCase(creditCard);
         Optional<User> customer = customerRepository.findById(customerId);
         validator.validateObject(customer, customerId);
-        creditCard.setCustomer(customerRepository.getReferenceById(customerId));
+        creditCard.setCustomer(customer.get());
         creditCardRepository.save(creditCard);
     }
 

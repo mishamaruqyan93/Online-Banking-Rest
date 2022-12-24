@@ -40,22 +40,22 @@ public class ExceptionFactory {
 
     public EntityNotFoundException invalidCostumerByEmail(String email) {
         log.error("Customer  was passed null by this email {}", new Date());
-        throw new EntityNotFoundException("Customer does not exist by this email: " + email);
+        return new EntityNotFoundException("Customer does not exist by this email: " + email);
     }
 
     public TransferAccountPassiveException invalidAccountActiveAndBalance() {
         log.error("This account is not active! {}", new Date());
-        throw new TransferAccountPassiveException("Account is not active!");
+        return new TransferAccountPassiveException("Account is not active!");
     }
 
     public TransferFailedException invalidAccountInBalance() {
         log.error("There are not enough funds on this account : {}", new Date());
-        throw new TransferFailedException("You haven't enough money!");
+        return new TransferFailedException("You haven't enough money!");
     }
 
     public TransferFailedException invalidAmount() {
         log.error("The balance of this transfer was 0 or below 0 {}", new Date());
-        throw new TransferFailedException("Balance cannot be 0 or below 0");
+        return new TransferFailedException("Balance cannot be 0 or below 0");
     }
 
     public InternalServerError invalidCustomerRoleType() {
@@ -65,16 +65,16 @@ public class ExceptionFactory {
 
     public InternalServerError invalidLoanAmountSize() {
         log.info("Loan has already paid");
-        throw new InternalServerError("Loan has already paid: Thanks for using our services");
+        return new InternalServerError("Loan has already paid: Thanks for using our services");
     }
 
     public InternalServerError invalidLoan() {
         log.error("Object of type loan does not exist");
-        throw new InternalServerError("No value present.");
+        return new InternalServerError("No value present.");
     }
 
     public EntityNotFoundException AccountNotFoundException() {
         log.error("Object does not exist by this account-number");
-        throw new EntityNotFoundException("Object does not exist by this account-number");
+        return new EntityNotFoundException("Object does not exist by this account-number");
     }
 }

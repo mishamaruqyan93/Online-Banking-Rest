@@ -52,10 +52,11 @@ public class AccountServiceImpl implements AccountService, MoneyTransferService 
 
     @Override
     public Account save(Account account, Long customerId) {
-        account.setCustomer(customerRepository.getReferenceById(customerId));
+        validator.validateId(customerId);
+        validator.validateObjectNullCase(account);
         Optional<User> customer = customerRepository.findById(customerId);
         validator.validateObject(customer, customerId);
-        validator.validateObjectNullCase(account);
+        account.setCustomer(customer.get());
         return accountRepository.save(account);
     }
 
@@ -108,22 +109,27 @@ public class AccountServiceImpl implements AccountService, MoneyTransferService 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendToAnotherAccount(MoneyTransfer moneyTransfer, Long from, Long to) {
         validator.validateObjectNullCase(moneyTransfer);
-        moneyTransfer.setAccountFrom(findAccountByAccountNumber(String.valueOf(from)));
-        moneyTransfer.setAccountTo(findAccountByAccountNumber(String.valueOf(to)));
+        Optional<Account> accountFrom = findAccountByAccountNumber(String.valueOf(from));
+        Optional<Account> accountTo = findAccountByAccountNumber(String.valueOf(to));
+        validator.validateObject(accountFrom, from);
+        validator.validateObject(accountTo, from);
 
-        Optional<Account> accountFromDBFrom = accountRepository.findById(moneyTransfer.getAccountFrom().getId());
-        validator.validateObject(accountFromDBFrom, from);
-        Optional<Account> accountFromDBTo = accountRepository.findById(moneyTransfer.getAccountTo().getId());
-        validator.validateObject(accountFromDBTo, to);
+        moneyTransfer.setAccountFrom(accountFrom.get());
+        moneyTransfer.setAccountTo(accountTo.get());
         validator.validateAccountActiveAndBalance(moneyTransfer);
 
         Double calculatedAmount = getCalculatedByCurrency(moneyTransfer.getAmount(),
-                accountFromDBFrom.get().getCurrencyType(), accountFromDBTo.get().getCurrencyType());
-        accountFromDBFrom.get().setCurrentBalance(accountFromDBFrom.get().getCurrentBalance() - moneyTransfer.getAmount());
-        accountFromDBTo.get().setCurrentBalance(accountFromDBTo.get().getCurrentBalance() + calculatedAmount);
+                accountFrom.get().getCurrencyType(), accountTo.get().getCurrencyType());
+        accountFrom.get().setCurrentBalance(accountFrom.get().getCurrentBalance() - moneyTransfer.getAmount());
+        accountTo.get().setCurrentBalance(accountTo.get().getCurrentBalance() + calculatedAmount);
 
-        MoneyTransfer moneyTransferUpdated = updateMoneyTransfer(moneyTransfer, accountFromDBFrom, accountFromDBTo);
+        MoneyTransfer moneyTransferUpdated = updateMoneyTransfer(moneyTransfer, accountFrom, accountTo);
         moneyTransferRepository.save(moneyTransferUpdated);
+    }
+
+    @Override
+    public List<MoneyTransfer> getAllTransfersOfLastYear() {
+        return moneyTransferRepository.findMoneyTransferByTransferDateOfLastYear();
     }
 
     private MoneyTransfer updateMoneyTransfer(MoneyTransfer moneyTransfer, Optional<Account> accountFromDBFrom, Optional<Account> accountFromDBTo) {
@@ -135,15 +141,10 @@ public class AccountServiceImpl implements AccountService, MoneyTransferService 
         return moneyTransfer;
     }
 
-    @Override
-    public List<MoneyTransfer> getAllTransfersOfLastYear() {
-        return moneyTransferRepository.findMoneyTransferByTransferDateOfLastYear();
-    }
-
-    private Account findAccountByAccountNumber(String accountNumber) {
+    private Optional<Account> findAccountByAccountNumber(String accountNumber) {
         Optional<Account> accountByAccountNumber = accountRepository.findAccountByAccountNumber(accountNumber);
         validator.validateAccount(accountByAccountNumber);
-        return accountByAccountNumber.get();
+        return accountByAccountNumber;
     }
 
     private Double getCalculatedByCurrency(Double amount, CurrencyType currencyTypeFrom, CurrencyType currencyTypeTo) {
